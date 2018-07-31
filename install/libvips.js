@@ -58,6 +58,17 @@ try {
     });
     tmpFile.on('close', function () {
       const vendorPath = path.join(__dirname, '..', 'vendor');
+      if( fs.existsSync(vendorPath) ) {
+        fs.readdirSync(vendorPath).forEach(function(file,index){
+          var curPath = vendorPath + "/" + file;
+          if(fs.lstatSync(curPath).isDirectory()) { // recurse
+            deleteFolderRecursive(curPath);
+          } else { // delete file
+            fs.unlinkSync(curPath);
+          }
+        });
+        fs.rmdirSync(vendorPath);
+      }
       fs.mkdirSync(vendorPath);
       tar
         .extract({
