@@ -58,16 +58,21 @@ try {
     });
     tmpFile.on('close', function () {
       const vendorPath = path.join(__dirname, '..', 'vendor');
+      var deleteFolderRecursive = function(path) {
+        if( fs.existsSync(path) ) {
+          fs.readdirSync(path).forEach(function(file,index){
+            var curPath = path + "/" + file;
+            if(fs.lstatSync(curPath).isDirectory()) { // recurse
+              deleteFolderRecursive(curPath);
+            } else { // delete file
+              fs.unlinkSync(curPath);
+            }
+          });
+        }
+        fs.rmdirSync(path);
+      }
       if( fs.existsSync(vendorPath) ) {
-        fs.readdirSync(vendorPath).forEach(function(file,index){
-          var curPath = vendorPath + "/" + file;
-          if(fs.lstatSync(curPath).isDirectory()) { // recurse
-            deleteFolderRecursive(curPath);
-          } else { // delete file
-            fs.unlinkSync(curPath);
-          }
-        });
-        fs.rmdirSync(vendorPath);
+        deleteFolderRecursive(vendorPath);
       }
       fs.mkdirSync(vendorPath);
       tar
