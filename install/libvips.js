@@ -17,6 +17,20 @@ const platform = require('../lib/platform');
 const minimumLibvipsVersion = libvips.minimumLibvipsVersion;
 const distBaseUrl = process.env.SHARP_DIST_BASE_URL || `https://github.com/lovell/sharp-libvips/releases/download/v${minimumLibvipsVersion}/`;
 
+var deleteFolderRecursive = function(path) {
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+  }
+  fs.rmdirSync(path);
+}
+
 try {
   const useGlobalLibvips = libvips.useGlobalLibvips();
   if (useGlobalLibvips) {
@@ -58,19 +72,6 @@ try {
     });
     tmpFile.on('close', function () {
       const vendorPath = path.join(__dirname, '..', 'vendor');
-      var deleteFolderRecursive = function(path) {
-        if( fs.existsSync(path) ) {
-          fs.readdirSync(path).forEach(function(file,index){
-            var curPath = path + "/" + file;
-            if(fs.lstatSync(curPath).isDirectory()) { // recurse
-              deleteFolderRecursive(curPath);
-            } else { // delete file
-              fs.unlinkSync(curPath);
-            }
-          });
-        }
-        fs.rmdirSync(path);
-      }
       if( fs.existsSync(vendorPath) ) {
         deleteFolderRecursive(vendorPath);
       }
